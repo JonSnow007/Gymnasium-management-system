@@ -1,0 +1,4 @@
+package: github.com/JonSnow47/Gymnasium-management-system/GMS
+import:
+- package: github.com/labstack/echo
+  version: ^3.3.5
