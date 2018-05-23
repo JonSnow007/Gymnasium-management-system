@@ -65,7 +65,7 @@ func (*adminHandler) Login(c echo.Context) error {
 	ok, err := model.AdminService.Login(req.Name, req.Pwd)
 	if err == nil {
 		if ok == true {
-			return c.JSON(http.StatusOK, RespData(common.RespSuccess))
+			return c.JSON(http.StatusOK, Resp(common.RespSuccess))
 		} else {
 			return c.JSON(http.StatusOK, RespData(common.RespSuccess, common.ErrLogin))
 		}

@@ -33,6 +33,9 @@ const (
 
 	ErrSession = "Session error" // Session 错误
 
-	ErrNoFound = "Not found"     // 未查询到数据
+	ErrDeal    = "Deal failed"// 交易失败
+	ErrBalance = "Lack of balance"// 余额不足
+
+	ErrNotFound = "Not found"     // 未查询到数据
 	ErrMongo   = "Mongodb error" // MongoDB 错误
 )

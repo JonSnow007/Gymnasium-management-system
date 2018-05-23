@@ -13,8 +13,12 @@ import (
 	"github.com/JonSnow47/Gymnasium-management-system/GMS/common"
 )
 
+func Resp(status string) map[string]string {
+	return map[string]string{common.RespKeyStatus: status}
+}
+
 // 对请求结果的状态和结果排版
-func RespData(status string, data ...interface{}) map[string]interface{} {
+func RespData(status string, data interface{}) map[string]interface{} {
 	if data == nil {
 		return map[string]interface{}{common.RespKeyStatus: status}
 	}

@@ -20,7 +20,7 @@ const collectionAdmin = "admin"
 type adminServiceProvide struct{}
 var AdminService *adminServiceProvide
 
-func connect() db.Connection {
+func conAdmin() db.Connection {
 	con := db.Connect(collectionAdmin)
 	con.C.EnsureIndex(mgo.Index{
 		Key:        []string{"_id", "Name"},
@@ -41,7 +41,7 @@ type Admin struct {
 
 // 新建管理员
 func (*adminServiceProvide) New(name, pwd string) (bson.ObjectId, error) {
-	con := connect()
+	con := conAdmin()
 	defer con.S.Close()
 
 	if len(pwd) < 6 || len(pwd) > 16 {
@@ -70,7 +70,7 @@ func (*adminServiceProvide) New(name, pwd string) (bson.ObjectId, error) {
 
 // Login
 func (*adminServiceProvide) Login(name, pwd string) (bool, error) {
-	con := db.Connect(collectionAdmin)
+	con := conAdmin()
 	defer con.D.Session.Close()
 
 	var admin Admin
