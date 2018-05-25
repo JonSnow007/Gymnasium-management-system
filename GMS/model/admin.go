@@ -7,23 +7,25 @@ package model
 
 import (
 	"errors"
+	"time"
+
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/JonSnow47/Gymnasium-management-system/GMS/db"
 	"github.com/JonSnow47/Gymnasium-management-system/GMS/util"
-	"time"
 )
 
 const collectionAdmin = "admin"
 
 type adminServiceProvide struct{}
+
 var AdminService *adminServiceProvide
 
 func conAdmin() db.Connection {
 	con := db.Connect(collectionAdmin)
 	con.C.EnsureIndex(mgo.Index{
-		Key:        []string{"_id", "Name"},
+		Key:        []string{"_id"},
 		Unique:     true,
 		DropDups:   true,
 		Background: true,
@@ -33,7 +35,7 @@ func conAdmin() db.Connection {
 }
 
 type Admin struct {
-	Id      bson.ObjectId `bson:"_id,omitempty"`
+	Id      bson.ObjectId `bson:"_id"`
 	Name    string        `bson:"Name"`
 	Pwd     string        `bson:"Pwd"`
 	Created time.Time     `bson:"Created"`
@@ -77,11 +79,11 @@ func (*adminServiceProvide) Login(name, pwd string) (bool, error) {
 
 	err := con.C.Find(bson.M{"Name": name}).One(&admin)
 	if err != nil {
-		return false,err
+		return false, err
 	}
 
 	if util.CompareHash([]byte(admin.Pwd), pwd) {
-		return true,nil
+		return true, nil
 	}
-	return false,nil
+	return false, nil
 }

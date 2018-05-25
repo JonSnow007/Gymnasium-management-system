@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo"
+	"gopkg.in/mgo.v2"
 
 	"github.com/JonSnow47/Gymnasium-management-system/GMS/common"
 	"github.com/JonSnow47/Gymnasium-management-system/GMS/model"
@@ -28,12 +29,12 @@ func (*adminHandler) New(c echo.Context) error {
 	)
 
 	if err = c.Bind(&req); err != nil {
-		c.Logger().Info("[Parameter]", err)
+		c.Logger().Error("[Parameter]", err)
 		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrParam))
 	}
 
 	if err = c.Validate(&req); err != nil {
-		c.Logger().Info("[Validate]", err)
+		c.Logger().Error("[Validate]", err)
 		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrValidate))
 	}
 
@@ -53,24 +54,26 @@ func (*adminHandler) Login(c echo.Context) error {
 	}
 
 	if err := c.Bind(&req); err != nil {
-		c.Logger().Info("[Parameter]", err)
+		c.Logger().Error("[Parameter]", err)
 		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrParam))
 	}
 
 	if err := c.Validate(&req); err != nil {
-		c.Logger().Info("[Validate]", err)
+		c.Logger().Error("[Validate]", err)
 		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrValidate))
 	}
 
 	ok, err := model.AdminService.Login(req.Name, req.Pwd)
-	if err == nil {
-		if ok == true {
-			return c.JSON(http.StatusOK, Resp(common.RespSuccess))
-		} else {
-			return c.JSON(http.StatusOK, RespData(common.RespSuccess, common.ErrLogin))
+	if err != nil {
+		if err == mgo.ErrNotFound {
+			return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrNotFound))
 		}
+		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrMongo))
 	}
 
-	c.Logger().Error("[Admin Login]", err)
-	return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrMongo))
+	if ok == true {
+		return c.JSON(http.StatusOK, Resp(common.RespSuccess))
+	} else {
+		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrLogin))
+	}
 }

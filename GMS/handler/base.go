@@ -6,7 +6,9 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo"
 
@@ -34,4 +36,22 @@ func RespId(status string, id interface{}) map[string]interface{} {
 
 func Home(c echo.Context) error {
 	return c.String(http.StatusOK, "Welcome to Gymnasium-management-system!")
+}
+
+func Test(c echo.Context) error {
+	var req struct {
+		phone string `validate:"numeric,len=11"`
+	}
+	req.phone = c.FormValue("phone")
+	if err := c.Validate(&req); err != nil {
+		c.Logger().Info("[Validate]", err)
+		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrValidate))
+	}
+
+	c.Logger().Error(req.phone)
+	fmt.Println(strconv.Atoi(req.phone))
+
+	return c.JSON(http.StatusOK, Resp(common.RespSuccess))
+	//model.Test("13633309095")
+	return nil
 }

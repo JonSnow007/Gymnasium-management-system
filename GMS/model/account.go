@@ -12,21 +12,20 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
+	"github.com/JonSnow47/Gymnasium-management-system/GMS/common"
 	"github.com/JonSnow47/Gymnasium-management-system/GMS/db"
 	"github.com/JonSnow47/Gymnasium-management-system/GMS/util"
-	"github.com/JonSnow47/Gymnasium-management-system/GMS/common"
 )
 
 const collectionAccount = "account"
 
 type Account struct {
-	Id      bson.ObjectId `bson:"_id,omitempty"`
-	Name    string        `bson:"Name"`
-	Phone   string        `bson:"Phone"`
-	Balance float64       `bson:"Balance"` // 余额
-	Active  bool          `bson:"Active"`  // 用户是否在场
-	State   bool          `bson:"Status"`  // 身份：0.不可用 1.正常使用
-	Created time.Time     `bson:"Created"`
+	Phone   string    `bson:"_id"`
+	Name    string    `bson:"name"`
+	Balance float64   `bson:"balance"` // 余额
+	Active  bool      `bson:"active"`  // 用户是否在场
+	State   bool      `bson:"state"`   // 身份：0.不可用 1.正常使用
+	Created time.Time `bson:"created"`
 }
 
 type accountServiceProvide struct{}
@@ -36,7 +35,7 @@ var AccountService *accountServiceProvide
 func conAccount() db.Connection {
 	con := db.Connect(collectionAccount)
 	con.C.EnsureIndex(mgo.Index{
-		Key:        []string{"_id", "Phone"},
+		Key:        []string{"_id"},
 		Unique:     true,
 		DropDups:   true,
 		Background: true,
@@ -45,16 +44,15 @@ func conAccount() db.Connection {
 	return con
 }
 
-func (*accountServiceProvide) New(name, phone string) (bson.ObjectId, error) {
+func (*accountServiceProvide) New(name, phone string) error {
 	con := conAccount()
 	defer con.S.Close()
 
 	if !util.PhoneNum(phone) {
-		return "", errors.New("Incorrect phone num")
+		return errors.New("Incorrect phone num")
 	}
 
 	var account = &Account{
-		//Id:      bson.NewObjectId(),
 		Name:    name,
 		Phone:   phone,
 		Balance: 0,
@@ -64,10 +62,10 @@ func (*accountServiceProvide) New(name, phone string) (bson.ObjectId, error) {
 
 	err := con.C.Insert(account)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	return account.Id, nil
+	return nil
 }
 
 func (*accountServiceProvide) ModifyPhone(old, new string) error {
@@ -78,7 +76,7 @@ func (*accountServiceProvide) ModifyPhone(old, new string) error {
 		return errors.New("Incorrect phone num")
 	}
 
-	err := con.C.Update(bson.M{"Phone": old, "State": true}, bson.M{"$set": bson.M{"Phone": new}})
+	err := con.C.Update(bson.M{"_id": old}, bson.M{"$set": bson.M{"_id": new}})
 	return err
 }
 
@@ -89,12 +87,12 @@ func (*accountServiceProvide) InOut(phone string) error {
 
 	var a Account
 
-	err := con.C.Find(bson.M{"Phone": phone}).One(&a)
+	err := con.C.Find(bson.M{"phone": phone}).One(&a)
 	if err != nil {
 		return err
 	}
 
-	err = con.C.Update(bson.M{"In": a.Active}, bson.M{"$set": bson.M{"In": !a.Active}})
+	err = con.C.Update(bson.M{"active": a.Active}, bson.M{"$set": bson.M{"active": !a.Active}})
 	return err
 }
 
@@ -105,12 +103,11 @@ func (*accountServiceProvide) ModifyState(phone string) error {
 
 	var a Account
 
-	err := con.C.Find(bson.M{"Phone": phone}).One(&a)
+	err := con.C.Find(bson.M{"_id": phone}).Select(bson.M{"state": 1}).One(&a)
 	if err != nil {
 		return err
 	}
-
-	err = con.C.Update(bson.M{"State": a.Active}, bson.M{"$set": bson.M{"State": !a.Active}})
+	err = con.C.Update(bson.M{"_id": phone}, bson.M{"$set": bson.M{"state": !a.State}})
 	return err
 }
 
@@ -119,7 +116,7 @@ func (*accountServiceProvide) Info(phone string) (a *Account, err error) {
 	con := conAccount()
 	defer con.S.Close()
 
-	err = con.C.Find(bson.M{"Phone": phone}).One(&a)
+	err = con.C.Find(bson.M{"_id": phone}).One(&a)
 	if err != nil {
 		return nil, err
 	}
@@ -136,31 +133,21 @@ func (*accountServiceProvide) All() (a []Account, err error) {
 	return
 }
 
-// Deal
-func (*accountServiceProvide) Deal(phone string, money int) error {
+// Deal recharge or pay.
+func (*accountServiceProvide) Deal(phone string, money float64) (float64, error) {
 	con := conAccount()
 	defer con.S.Close()
 
-	var sum int
-	err := con.C.Find(bson.M{"Phone": phone}).Select(bson.M{"Balance": 1}).One(&sum)
+	var a Account
+	err := con.C.Find(bson.M{"_id": phone}).Select(bson.M{"balance": 1}).One(&a)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	if sum-money < 0 {
-		return errors.New(common.ErrBalance)
+	if a.Balance+money < 0 {
+		return 0, errors.New(common.ErrBalance)
 	}
 
-	err = con.C.Update(bson.M{"Phone": phone, "State": true}, bson.M{"$inc": bson.M{"Balance": money}})
-	return err
-}
-
-func Test(phone string) {
-	con := conAccount()
-	defer con.S.Close()
-
-	var res string
-	con.C.Find(bson.M{"Phone": phone}).Select(bson.M{"Name": 1}).One(&res)
-
-	print(res)
+	err = con.C.Update(bson.M{"_id": phone, "state": true}, bson.M{"$inc": bson.M{"balance": money}})
+	return a.Balance + money, err
 }
