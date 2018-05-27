@@ -12,7 +12,7 @@ import (
 )
 
 func Init(e *echo.Echo) {
-	e.GET("/home", handler.Home)
+	e.GET("/home", handler.Service.Home)
 
 	e.POST("/admin/new", handler.Admin.New)
 	e.POST("/admin/login", handler.Admin.Login)
@@ -23,17 +23,16 @@ func Init(e *echo.Echo) {
 	e.GET("/account/list", handler.Account.List)
 	e.GET("/account/recharge", handler.Account.Recharge)
 
-	e.GET("/ground/new", handler.Ground.New)
-	e.GET("/ground/info", handler.Ground.Info)
-	e.GET("/ground/list", handler.Ground.List)
-	e.GET("/ground/state", handler.Ground.ModifyState)
+	e.GET("/gym/new", handler.Ground.New)
+	e.GET("/gym/info", handler.Ground.Info)
+	e.GET("/gym/list", handler.Ground.List)
+	e.GET("/gym/state", handler.Ground.ModifyState)
 
-	//////////////////未测试
 	e.GET("/bill/info", handler.Bill.Info)
 	e.GET("/bill/list", handler.Bill.List)
+	e.GET("/bill/listbyphone", handler.Bill.ListByPhone)
+	e.GET("/bill/listbygid", handler.Bill.ListByGid)
 
-	//e.GET("/in", handler.In)
-	//e.GET("/out", handler.Out)
-
-	e.GET("/test", handler.Test)
+	e.GET("/service/in", handler.Service.In)
+	e.GET("/service/out", handler.Service.Out)
 }

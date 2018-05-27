@@ -42,7 +42,7 @@ type Admin struct {
 }
 
 // 新建管理员
-func (*adminServiceProvide) New(name, pwd string) (bson.ObjectId, error) {
+func (*adminServiceProvide) New(name, pwd string) (string, error) {
 	con := conAdmin()
 	defer con.S.Close()
 
@@ -67,7 +67,7 @@ func (*adminServiceProvide) New(name, pwd string) (bson.ObjectId, error) {
 		return "", err
 	}
 
-	return admin.Id, nil
+	return admin.Id.Hex(), nil
 }
 
 // Login

@@ -26,6 +26,7 @@ const (
 	ErrParam    = "Parameter" // 参数错误
 	ErrValidate = "Validate"  // 参数验证失败
 
+	ErrForbidden     = "Forbidden"                  // 禁止使用
 	ErrExist         = "Exist"                      // 已存在
 	ErrNotFound      = "Not found"                  // 未查询到数据
 	ErrLogin         = "Incorrect name or password" // 密码错误
@@ -34,8 +35,12 @@ const (
 
 	ErrSession = "Session error" // Session 错误
 
+	ErrMongo = "Mongodb error" // MongoDB 错误
+)
+
+const (
 	ErrDeal    = "Deal failed"     // 交易失败
 	ErrBalance = "Lack of balance" // 余额不足
 
-	ErrMongo = "Mongodb error" // MongoDB 错误
+	ErrGymUsing = "Using" // 使用中
 )

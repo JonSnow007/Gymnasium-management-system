@@ -33,16 +33,16 @@ func (*groundHandler) New(c echo.Context) error {
 
 	if err = c.Validate(&req); err != nil {
 		c.Logger().Error("[Validate]", err)
-		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrValidate))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrValidate))
 	}
 
-	err = model.GroundService.New(req.Name)
+	err = model.GymService.New(req.Name)
 	if err != nil {
 		c.Logger().Error("[New account]", err)
-		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
 	}
 
-	return c.JSON(http.StatusOK, Resp(common.RespSuccess))
+	return c.JSON(http.StatusOK, Resp(common.RespSuccess, nil))
 }
 
 // 场地信息
@@ -57,32 +57,32 @@ func (*groundHandler) Info(c echo.Context) error {
 	req.Id, err = strconv.Atoi(c.FormValue("id"))
 	if err != nil {
 		c.Logger().Error("[Validate]", err)
-		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrValidate))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrValidate))
 	}
 
-	g, err := model.GroundService.Info(req.Id)
+	g, err := model.GymService.Info(req.Id)
 	if err != nil {
 		if err == mgo.ErrNotFound {
 			c.Logger().Error("[Info]", err)
-			return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrNotFound))
+			return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrNotFound))
 		}
 		c.Logger().Error("[Info]", err)
-		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
 	}
 
-	return c.JSON(http.StatusOK, RespData(common.RespSuccess, g))
+	return c.JSON(http.StatusOK, Resp(common.RespSuccess, g))
 }
 
 // 场地列表
 func (*groundHandler) List(c echo.Context) error {
 
-	g, err := model.GroundService.List()
+	g, err := model.GymService.List()
 	if err != nil {
 		c.Logger().Error("[List]", err)
-		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
 	}
 
-	return c.JSON(http.StatusOK, RespData(common.RespSuccess, g))
+	return c.JSON(http.StatusOK, Resp(common.RespSuccess, g))
 }
 
 // 修改场地状态
@@ -97,14 +97,14 @@ func (*groundHandler) ModifyState(c echo.Context) error {
 	req.Id, err = strconv.Atoi(c.FormValue("id"))
 	if err != nil {
 		c.Logger().Error("[Validate]", err)
-		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrValidate))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrValidate))
 	}
 
-	err = model.GroundService.State(req.Id)
+	err = model.GymService.State(req.Id)
 	if err != nil {
 		c.Logger().Error("[ModifyState]", err)
-		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
 	}
 
-	return c.JSON(http.StatusOK, Resp(common.RespSuccess))
+	return c.JSON(http.StatusOK, Resp(common.RespSuccess, nil))
 }

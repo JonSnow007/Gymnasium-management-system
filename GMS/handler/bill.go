@@ -13,6 +13,7 @@ import (
 
 	"github.com/JonSnow47/Gymnasium-management-system/GMS/common"
 	"github.com/JonSnow47/Gymnasium-management-system/GMS/model"
+	"github.com/JonSnow47/Gymnasium-management-system/GMS/util"
 )
 
 type billHandler struct{}
@@ -28,58 +29,50 @@ func (*billHandler) Info(c echo.Context) error {
 
 	if err := c.Validate(&req); err != nil {
 		c.Logger().Error("[Validate]", err)
-		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrValidate))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrValidate))
 	}
 
 	a, err := model.BillService.Info(req.Id)
 	if err != nil {
 		c.Logger().Error("[Info]", err)
-		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
 	}
 
-	return c.JSON(http.StatusOK, RespData(common.RespSuccess, a))
+	return c.JSON(http.StatusOK, Resp(common.RespSuccess, a))
 }
 
 func (*billHandler) ListByPhone(c echo.Context) error {
-	var req struct {
-		Phone string `validate:"alphanum,len=11"`
+	phone := c.FormValue("phone")
+
+	if !util.PhoneNum(phone) {
+		c.Logger().Error("[Validate]", common.ErrParam)
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrValidate))
 	}
 
-	req.Phone = c.FormValue("id")
-
-	if err := c.Validate(&req); err != nil {
-		c.Logger().Error("[Validate]", err)
-		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrValidate))
-	}
-
-	a, err := model.BillService.ListByPhone(req.Phone)
+	bills, err := model.BillService.ListByPhone(phone)
 	if err != nil {
 		c.Logger().Error("[ListByPhone]", err)
-		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
 	}
 
-	return c.JSON(http.StatusOK, RespData(common.RespSuccess, a))
+	return c.JSON(http.StatusOK, Resp(common.RespSuccess, bills))
 }
 
-func (*billHandler) ListByPid(c echo.Context) error {
-	var req struct {
-		Pid int `validate:"numeric"`
-	}
+func (*billHandler) ListByGid(c echo.Context) error {
+	gid, err := strconv.Atoi(c.FormValue("id"))
 
-	req.Pid, _ = strconv.Atoi(c.FormValue("id"))
-
-	if err := c.Validate(&req); err != nil {
+	if err != nil {
 		c.Logger().Error("[Validate]", err)
-		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrValidate))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrValidate))
 	}
 
-	a, err := model.BillService.ListByPid(req.Pid)
+	a, err := model.BillService.ListByGid(gid)
 	if err != nil {
 		c.Logger().Error("[ListByPid]", err)
-		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
 	}
 
-	return c.JSON(http.StatusOK, RespData(common.RespSuccess, a))
+	return c.JSON(http.StatusOK, Resp(common.RespSuccess, a))
 }
 
 func (*billHandler) List(c echo.Context) error {
@@ -87,8 +80,8 @@ func (*billHandler) List(c echo.Context) error {
 	a, err := model.BillService.List()
 	if err != nil {
 		c.Logger().Error("[List]", err)
-		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
 	}
 
-	return c.JSON(http.StatusOK, RespData(common.RespSuccess, a))
+	return c.JSON(http.StatusOK, Resp(common.RespSuccess, a))
 }

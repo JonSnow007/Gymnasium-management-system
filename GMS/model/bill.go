@@ -11,19 +11,22 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
+	"github.com/JonSnow47/Gymnasium-management-system/GMS/conf"
 	"github.com/JonSnow47/Gymnasium-management-system/GMS/db"
 )
 
 const collectionBill = "bill"
 
 type Bill struct {
-	Id      bson.ObjectId `bson:"_id"`
-	Phone   string        `bson:"phone,len=11"` // 用户 id
-	Pid     int           `bson:"pid"`          // 场地 id
-	Sum     float64       `bson:"sum"`          // 金额
-	State   bool          `bson:"state"`        // true:完成 false:未完成
-	Created time.Time     `bson:"created"`      // 创建时间
-	Updated time.Time     `bson:"updated"`      // 交易完成时间
+	Id       bson.ObjectId `bson:"_id"`
+	Phone    string        `bson:"Phone"`    // 用户 id
+	Gid      int           `bson:"Gid"`      // 场地 id
+	State    bool          `bson:"State"`    // true:完成 false:未完成
+	InAt     time.Time     `bson:"InAt"`     // 入场时间
+	OutAt    time.Time     `bson:"OutAt"`    // 出场时间
+	Duration float64       `bson:"Duration"` // 使用时长
+	Price    float32       `bson:"Price"`    // 单价: ￥/h
+	Consume  float32       `bson:"Consume"`  // 消费: ￥
 }
 
 type billServiceProvide struct{}
@@ -42,16 +45,17 @@ func conBill() db.Connection {
 	return con
 }
 
-func (*billServiceProvide) New(phone string, pid int, sum float64) (err error) {
+// New bill.
+func (*billServiceProvide) New(phone string, gid int) (err error) {
 	con := conBill()
 	defer con.S.Close()
 
 	var bill = &Bill{
-		Id:      bson.NewObjectId(),
-		Phone:   phone,
-		Pid:     pid,
-		Sum:     sum,
-		Created: time.Now(),
+		Id:    bson.NewObjectId(),
+		Phone: phone,
+		Gid:   gid,
+		InAt:  time.Now(),
+		Price: conf.Conf.Gms.Price,
 	}
 
 	err = con.C.Insert(bill)
@@ -59,17 +63,27 @@ func (*billServiceProvide) New(phone string, pid int, sum float64) (err error) {
 	return err
 }
 
-func (*billServiceProvide) State(id bson.ObjectId) (err error) {
+// Clearing the bill.
+func (*billServiceProvide) Clearing(phone string) (b Bill, err error) {
 	con := conBill()
 	defer con.S.Close()
 
-	err = con.C.Update(bson.M{"_id": id},
-		bson.M{"$set": bson.M{"state": true, "updated": time.Now()}})
+	err = con.C.Find(bson.M{"Phone": phone, "State": false}).Sort("-InAt").One(&b)
 	if err != nil {
-		return err
+		return
 	}
 
-	return nil
+	b.OutAt = time.Now()
+	b.Duration = time.Since(b.InAt).Minutes()
+	b.Consume = float32(b.Duration) / 60 * b.Price
+	b.State = true
+
+	err = con.C.Update(bson.M{"_id": b.Id}, &b)
+	if err != nil {
+		return
+	}
+
+	return
 }
 
 func (*billServiceProvide) Info(id string) (b *Bill, err error) {
@@ -84,11 +98,11 @@ func (*billServiceProvide) Info(id string) (b *Bill, err error) {
 	return b, nil
 }
 
-func (*billServiceProvide) ListByPhone(phone string) (b *[]Bill, err error) {
+func (*billServiceProvide) ListByPhone(phone string) (b []*Bill, err error) {
 	con := conBill()
 	defer con.S.Close()
 
-	err = con.C.Find(bson.M{"phone": phone}).Sort("-created").All(&b)
+	err = con.C.Find(bson.M{"Phone": phone}).Sort("-InAt").All(&b)
 	if err != nil {
 		return nil, err
 	}
@@ -96,11 +110,11 @@ func (*billServiceProvide) ListByPhone(phone string) (b *[]Bill, err error) {
 	return b, nil
 }
 
-func (*billServiceProvide) ListByPid(pid int) (b *[]Bill, err error) {
+func (*billServiceProvide) ListByGid(gid int) (b []*Bill, err error) {
 	con := conBill()
 	defer con.S.Close()
 
-	err = con.C.Find(bson.M{"pid": pid}).Sort("-created").All(&b)
+	err = con.C.Find(bson.M{"Gid": gid}).Sort("-InAt").All(&b)
 	if err != nil {
 		return nil, err
 	}
@@ -108,11 +122,11 @@ func (*billServiceProvide) ListByPid(pid int) (b *[]Bill, err error) {
 	return b, nil
 }
 
-func (*billServiceProvide) List() (b *[]Bill, err error) {
+func (*billServiceProvide) List() (b []*Bill, err error) {
 	con := conBill()
 	defer con.S.Close()
 
-	err = con.C.Find(nil).Sort("-created").All(&b)
+	err = con.C.Find(nil).Sort("-InAt").All(&b)
 	if err != nil {
 		return nil, err
 	}

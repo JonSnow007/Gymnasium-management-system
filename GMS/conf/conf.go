@@ -16,14 +16,19 @@ const (
 	MongoDB  = "GMS"
 )
 
-type mongoDB struct {
+type Gms struct {
+	Price float32
+}
+
+type Mgo struct {
 	Database string
 	URL      string
 }
 
 type Config struct {
 	Mod string
-	Mgo *mongoDB
+	Mgo *Mgo
+	Gms *Gms
 }
 
 var Conf Config
@@ -33,4 +38,5 @@ func init() {
 	if err != nil {
 		log.Println("[Parse configuraion]", err)
 	}
+	//fmt.Println(Conf)
 }

@@ -21,11 +21,11 @@ const collectionAccount = "account"
 
 type Account struct {
 	Phone   string    `bson:"_id"`
-	Name    string    `bson:"name"`
-	Balance float64   `bson:"balance"` // 余额
-	Active  bool      `bson:"active"`  // 用户是否在场
-	State   bool      `bson:"state"`   // 身份：0.不可用 1.正常使用
-	Created time.Time `bson:"created"`
+	Name    string    `bson:"Name"`
+	Balance float32   `bson:"Balance"` // 余额
+	Active  bool      `bson:"Active"`  // 用户是否在场
+	State   bool      `bson:"State"`   // 身份：0.不可用 1.正常使用
+	Created time.Time `bson:"Created"`
 }
 
 type accountServiceProvide struct{}
@@ -68,6 +68,7 @@ func (*accountServiceProvide) New(name, phone string) error {
 	return nil
 }
 
+// ModifyPhone forbidden
 func (*accountServiceProvide) ModifyPhone(old, new string) error {
 	con := conAccount()
 	defer con.S.Close()
@@ -87,12 +88,12 @@ func (*accountServiceProvide) InOut(phone string) error {
 
 	var a Account
 
-	err := con.C.Find(bson.M{"phone": phone}).One(&a)
+	err := con.C.Find(bson.M{"_id": phone}).One(&a)
 	if err != nil {
 		return err
 	}
 
-	err = con.C.Update(bson.M{"active": a.Active}, bson.M{"$set": bson.M{"active": !a.Active}})
+	err = con.C.Update(bson.M{"_id": phone}, bson.M{"$set": bson.M{"Active": !a.Active}})
 	return err
 }
 
@@ -103,11 +104,11 @@ func (*accountServiceProvide) ModifyState(phone string) error {
 
 	var a Account
 
-	err := con.C.Find(bson.M{"_id": phone}).Select(bson.M{"state": 1}).One(&a)
+	err := con.C.Find(bson.M{"_id": phone}).Select(bson.M{"State": 1}).One(&a)
 	if err != nil {
 		return err
 	}
-	err = con.C.Update(bson.M{"_id": phone}, bson.M{"$set": bson.M{"state": !a.State}})
+	err = con.C.Update(bson.M{"_id": phone}, bson.M{"$set": bson.M{"State": !a.State}})
 	return err
 }
 
@@ -118,14 +119,14 @@ func (*accountServiceProvide) Info(phone string) (a *Account, err error) {
 
 	err = con.C.Find(bson.M{"_id": phone}).One(&a)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	return
 }
 
 // All
-func (*accountServiceProvide) All() (a []Account, err error) {
+func (*accountServiceProvide) All() (a []*Account, err error) {
 	con := conAccount()
 	defer con.S.Close()
 
@@ -134,12 +135,12 @@ func (*accountServiceProvide) All() (a []Account, err error) {
 }
 
 // Deal recharge or pay.
-func (*accountServiceProvide) Deal(phone string, money float64) (float64, error) {
+func (*accountServiceProvide) Deal(phone string, money float32) (float32, error) {
 	con := conAccount()
 	defer con.S.Close()
 
 	var a Account
-	err := con.C.Find(bson.M{"_id": phone}).Select(bson.M{"balance": 1}).One(&a)
+	err := con.C.Find(bson.M{"_id": phone}).Select(bson.M{"Balance": 1}).One(&a)
 	if err != nil {
 		return 0, err
 	}
@@ -148,6 +149,6 @@ func (*accountServiceProvide) Deal(phone string, money float64) (float64, error)
 		return 0, errors.New(common.ErrBalance)
 	}
 
-	err = con.C.Update(bson.M{"_id": phone, "state": true}, bson.M{"$inc": bson.M{"balance": money}})
+	err = con.C.Update(bson.M{"_id": phone, "State": true}, bson.M{"$inc": bson.M{"Balance": money}})
 	return a.Balance + money, err
 }

@@ -30,21 +30,21 @@ func (*adminHandler) New(c echo.Context) error {
 
 	if err = c.Bind(&req); err != nil {
 		c.Logger().Error("[Parameter]", err)
-		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrParam))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrParam))
 	}
 
 	if err = c.Validate(&req); err != nil {
 		c.Logger().Error("[Validate]", err)
-		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrValidate))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrValidate))
 	}
 
 	id, err := model.AdminService.New(req.Name, req.Pwd)
 	if err != nil {
 		c.Logger().Error("[New admin]", err)
-		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
 	}
 
-	return c.JSON(http.StatusOK, RespId(common.RespSuccess, id))
+	return c.JSON(http.StatusOK, Resp(common.RespSuccess, map[string]string{common.RespKeyId: id}))
 }
 
 func (*adminHandler) Login(c echo.Context) error {
@@ -55,25 +55,25 @@ func (*adminHandler) Login(c echo.Context) error {
 
 	if err := c.Bind(&req); err != nil {
 		c.Logger().Error("[Parameter]", err)
-		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrParam))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrParam))
 	}
 
 	if err := c.Validate(&req); err != nil {
 		c.Logger().Error("[Validate]", err)
-		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrValidate))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrValidate))
 	}
 
 	ok, err := model.AdminService.Login(req.Name, req.Pwd)
 	if err != nil {
 		if err == mgo.ErrNotFound {
-			return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrNotFound))
+			return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrNotFound))
 		}
-		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
 	}
 
 	if ok == true {
-		return c.JSON(http.StatusOK, Resp(common.RespSuccess))
+		return c.JSON(http.StatusOK, Resp(common.RespSuccess, nil))
 	} else {
-		return c.JSON(http.StatusOK, RespData(common.RespFailed, common.ErrLogin))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrLogin))
 	}
 }

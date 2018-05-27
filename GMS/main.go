@@ -6,8 +6,7 @@
 package main
 
 import (
-	"log"
-
+	"github.com/labstack/gommon/log"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"gopkg.in/go-playground/validator.v9"
@@ -19,10 +18,10 @@ func main() {
 	initEcho()
 }
 
-func init() {
-	log.SetFlags(log.Ldate | log.Lmicroseconds) // 设置 log 格式为毫秒级
-	//db.ConnectMongo()                           // 尝试连接 MongoDB
-}
+//func init() {
+//	log.SetFlags(log.Ldate | log.Lmicroseconds) // 设置 log 格式为毫秒级
+//	db.ConnectMongo()                           // 尝试连接 MongoDB
+//}
 
 func initEcho() {
 	e := echo.New()
@@ -33,6 +32,7 @@ func initEcho() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
+	e.Logger.SetLevel(log.Lvl(1))
 	// 定制 Validator, 基于validator.v9
 	e.Validator = &CustomValidator{validator: validator.New()}
 
