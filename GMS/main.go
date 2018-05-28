@@ -6,9 +6,9 @@
 package main
 
 import (
-	"github.com/labstack/gommon/log"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"github.com/labstack/gommon/log"
 	"gopkg.in/go-playground/validator.v9"
 
 	"github.com/JonSnow47/Gymnasium-management-system/GMS/router"
@@ -38,7 +38,7 @@ func initEcho() {
 
 	router.Init(e)
 
-	e.Logger.Fatal(e.Start(":9999"))
+	e.Logger.Fatal(e.Start(":8080"))
 }
 
 type CustomValidator struct {

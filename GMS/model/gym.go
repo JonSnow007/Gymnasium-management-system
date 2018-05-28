@@ -15,10 +15,10 @@ import (
 const collectionGym = "gym"
 
 type Gym struct {
-	Id    int    `bson:"_id"`
-	Name  string `bson:"Name"`
-	IsUse bool   `bson:"IsUse"` // 是否正在使用
-	State bool   `bson:"State"` // 状态：0.不可用
+	Id    int     `bson:"_id"`
+	Name  string  `bson:"Name"`
+	IsUse bool    `bson:"IsUse"` // 是否正在使用
+	State bool    `bson:"State"` // 状态：0.不可用
 }
 
 type gymServiceProvide struct{}

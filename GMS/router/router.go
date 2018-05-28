@@ -13,6 +13,8 @@ import (
 
 func Init(e *echo.Echo) {
 	e.GET("/home", handler.Service.Home)
+	e.GET("/service/in", handler.Service.In)
+	e.GET("/service/out", handler.Service.Out)
 
 	e.POST("/admin/new", handler.Admin.New)
 	e.POST("/admin/login", handler.Admin.Login)
@@ -32,7 +34,4 @@ func Init(e *echo.Echo) {
 	e.GET("/bill/list", handler.Bill.List)
 	e.GET("/bill/listbyphone", handler.Bill.ListByPhone)
 	e.GET("/bill/listbygid", handler.Bill.ListByGid)
-
-	e.GET("/service/in", handler.Service.In)
-	e.GET("/service/out", handler.Service.Out)
 }

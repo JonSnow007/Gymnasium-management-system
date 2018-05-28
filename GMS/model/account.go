@@ -130,7 +130,7 @@ func (*accountServiceProvide) All() (a []*Account, err error) {
 	con := conAccount()
 	defer con.S.Close()
 
-	err = con.C.Find(nil).All(&a)
+	err = con.C.Find(nil).Sort("-Created").All(&a)
 	return
 }
 
