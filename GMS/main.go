@@ -11,7 +11,7 @@ import (
 	"github.com/labstack/gommon/log"
 	"gopkg.in/go-playground/validator.v9"
 
-	"github.com/JonSnow47/Gymnasium-management-system/GMS/router"
+	"github.com/JonSnow007/Gymnasium-management-system/GMS/router"
 )
 
 func main() {

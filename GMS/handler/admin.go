@@ -11,8 +11,8 @@ import (
 	"github.com/labstack/echo"
 	"gopkg.in/mgo.v2"
 
-	"github.com/JonSnow47/Gymnasium-management-system/GMS/common"
-	"github.com/JonSnow47/Gymnasium-management-system/GMS/model"
+	"github.com/JonSnow007/Gymnasium-management-system/GMS/common"
+	"github.com/JonSnow007/Gymnasium-management-system/GMS/model"
 )
 
 type adminHandler struct{}
@@ -41,7 +41,7 @@ func (*adminHandler) New(c echo.Context) error {
 	id, err := model.AdminService.New(req.Name, req.Pwd)
 	if err != nil {
 		c.Logger().Error("[New admin]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
 	}
 
 	return c.JSON(http.StatusOK, Resp(common.RespSuccess, map[string]string{common.RespKeyId: id}))
@@ -68,12 +68,12 @@ func (*adminHandler) Login(c echo.Context) error {
 		if err == mgo.ErrNotFound {
 			return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrNotFound))
 		}
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
 	}
 
 	if ok == true {
 		return c.JSON(http.StatusOK, Resp(common.RespSuccess, nil))
 	} else {
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrLogin))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrAccount))
 	}
 }

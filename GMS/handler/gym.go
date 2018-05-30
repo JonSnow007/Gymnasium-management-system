@@ -12,8 +12,8 @@ import (
 	"github.com/labstack/echo"
 	"gopkg.in/mgo.v2"
 
-	"github.com/JonSnow47/Gymnasium-management-system/GMS/common"
-	"github.com/JonSnow47/Gymnasium-management-system/GMS/model"
+	"github.com/JonSnow007/Gymnasium-management-system/GMS/common"
+	"github.com/JonSnow007/Gymnasium-management-system/GMS/model"
 )
 
 type groundHandler struct{}
@@ -39,7 +39,7 @@ func (*groundHandler) New(c echo.Context) error {
 	err = model.GymService.New(req.Name)
 	if err != nil {
 		c.Logger().Error("[New account]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
 	}
 
 	return c.JSON(http.StatusOK, Resp(common.RespSuccess, nil))
@@ -67,7 +67,7 @@ func (*groundHandler) Info(c echo.Context) error {
 			return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrNotFound))
 		}
 		c.Logger().Error("[Info]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
 	}
 
 	return c.JSON(http.StatusOK, Resp(common.RespSuccess, g))
@@ -79,7 +79,7 @@ func (*groundHandler) List(c echo.Context) error {
 	g, err := model.GymService.List()
 	if err != nil {
 		c.Logger().Error("[List]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
 	}
 
 	return c.JSON(http.StatusOK, Resp(common.RespSuccess, g))
@@ -103,7 +103,7 @@ func (*groundHandler) ModifyState(c echo.Context) error {
 	err = model.GymService.State(req.Id)
 	if err != nil {
 		c.Logger().Error("[ModifyState]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
 	}
 
 	return c.JSON(http.StatusOK, Resp(common.RespSuccess, nil))

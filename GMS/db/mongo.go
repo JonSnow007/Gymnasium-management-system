@@ -8,7 +8,7 @@ package db
 import (
 	"gopkg.in/mgo.v2"
 
-	"github.com/JonSnow47/Gymnasium-management-system/GMS/conf"
+	"github.com/JonSnow007/Gymnasium-management-system/GMS/conf"
 )
 
 type Connection struct {

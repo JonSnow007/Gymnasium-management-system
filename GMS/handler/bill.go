@@ -11,9 +11,9 @@ import (
 
 	"github.com/labstack/echo"
 
-	"github.com/JonSnow47/Gymnasium-management-system/GMS/common"
-	"github.com/JonSnow47/Gymnasium-management-system/GMS/model"
-	"github.com/JonSnow47/Gymnasium-management-system/GMS/util"
+	"github.com/JonSnow007/Gymnasium-management-system/GMS/common"
+	"github.com/JonSnow007/Gymnasium-management-system/GMS/model"
+	"github.com/JonSnow007/Gymnasium-management-system/GMS/util"
 )
 
 type billHandler struct{}
@@ -35,7 +35,7 @@ func (*billHandler) Info(c echo.Context) error {
 	a, err := model.BillService.Info(req.Id)
 	if err != nil {
 		c.Logger().Error("[Info]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
 	}
 
 	return c.JSON(http.StatusOK, Resp(common.RespSuccess, a))
@@ -52,7 +52,7 @@ func (*billHandler) ListByPhone(c echo.Context) error {
 	bills, err := model.BillService.ListByPhone(phone)
 	if err != nil {
 		c.Logger().Error("[ListByPhone]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
 	}
 
 	return c.JSON(http.StatusOK, Resp(common.RespSuccess, bills))
@@ -69,7 +69,7 @@ func (*billHandler) ListByGid(c echo.Context) error {
 	a, err := model.BillService.ListByGid(gid)
 	if err != nil {
 		c.Logger().Error("[ListByPid]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
 	}
 
 	return c.JSON(http.StatusOK, Resp(common.RespSuccess, a))
@@ -80,7 +80,7 @@ func (*billHandler) List(c echo.Context) error {
 	a, err := model.BillService.List()
 	if err != nil {
 		c.Logger().Error("[List]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
 	}
 
 	return c.JSON(http.StatusOK, Resp(common.RespSuccess, a))

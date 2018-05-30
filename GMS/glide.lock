@@ -1,6 +1,0 @@
-hash: 2bb29c280afdd4eef6cb2536d18fb559acd66df17ab3fc2c838f4e43e962745c
-updated: 2018-05-21T11:11:24.097583+08:00
-imports:
-- name: github.com/labstack/echo
-  version: 6d227dfea4d2e52cb76856120b3c17f758139b4e
-testImports: []

@@ -12,8 +12,8 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
-	"github.com/JonSnow47/Gymnasium-management-system/GMS/db"
-	"github.com/JonSnow47/Gymnasium-management-system/GMS/util"
+	"github.com/JonSnow007/Gymnasium-management-system/GMS/db"
+	"github.com/JonSnow007/Gymnasium-management-system/GMS/util"
 )
 
 const collectionAdmin = "admin"

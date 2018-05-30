@@ -11,9 +11,9 @@ import (
 
 	"github.com/labstack/echo"
 
-	"github.com/JonSnow47/Gymnasium-management-system/GMS/common"
-	"github.com/JonSnow47/Gymnasium-management-system/GMS/model"
-	"github.com/JonSnow47/Gymnasium-management-system/GMS/util"
+	"github.com/JonSnow007/Gymnasium-management-system/GMS/common"
+	"github.com/JonSnow007/Gymnasium-management-system/GMS/model"
+	"github.com/JonSnow007/Gymnasium-management-system/GMS/util"
 )
 
 type serviceProdive struct{}
@@ -44,7 +44,7 @@ func (*serviceProdive) In(c echo.Context) error {
 	account, err := model.AccountService.Info(req.Phone)
 	if err != nil {
 		c.Logger().Error("[In]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
 	}
 	if account.Balance <= 0 {
 		c.Logger().Error("[In]", common.ErrBalance)
@@ -58,7 +58,7 @@ func (*serviceProdive) In(c echo.Context) error {
 	gym, err := model.GymService.Info(req.Gid)
 	if err != nil {
 		c.Logger().Error("[In]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
 	}
 	if gym.State == false {
 		c.Logger().Error("[In]", common.ErrForbidden)
@@ -72,7 +72,7 @@ func (*serviceProdive) In(c echo.Context) error {
 	err = model.BillService.New(req.Phone, req.Gid)
 	if err != nil {
 		c.Logger().Error("[In]", common.ErrGymUsing)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
 	}
 
 	err = model.AccountService.InOut(req.Phone)

@@ -12,9 +12,8 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
-	"github.com/JonSnow47/Gymnasium-management-system/GMS/common"
-	"github.com/JonSnow47/Gymnasium-management-system/GMS/db"
-	"github.com/JonSnow47/Gymnasium-management-system/GMS/util"
+	"github.com/JonSnow007/Gymnasium-management-system/GMS/db"
+	"github.com/JonSnow007/Gymnasium-management-system/GMS/util"
 )
 
 const collectionAccount = "account"
@@ -146,7 +145,7 @@ func (*accountServiceProvide) Deal(phone string, money float32) (float32, error)
 	}
 
 	if a.Balance+money < 0 {
-		return 0, errors.New(common.ErrBalance)
+		return 0, errors.New("Lack of balance")
 	}
 
 	err = con.C.Update(bson.M{"_id": phone, "State": true}, bson.M{"$inc": bson.M{"Balance": money}})

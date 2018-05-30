@@ -8,7 +8,7 @@ package router
 import (
 	"github.com/labstack/echo"
 
-	"github.com/JonSnow47/Gymnasium-management-system/GMS/handler"
+	"github.com/JonSnow007/Gymnasium-management-system/GMS/handler"
 )
 
 func Init(e *echo.Echo) {

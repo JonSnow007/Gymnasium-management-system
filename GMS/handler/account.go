@@ -12,9 +12,9 @@ import (
 	"github.com/labstack/echo"
 	"gopkg.in/mgo.v2"
 
-	"github.com/JonSnow47/Gymnasium-management-system/GMS/common"
-	"github.com/JonSnow47/Gymnasium-management-system/GMS/model"
-	"github.com/JonSnow47/Gymnasium-management-system/GMS/util"
+	"github.com/JonSnow007/Gymnasium-management-system/GMS/common"
+	"github.com/JonSnow007/Gymnasium-management-system/GMS/model"
+	"github.com/JonSnow007/Gymnasium-management-system/GMS/util"
 )
 
 type accountHandler struct{}
@@ -45,7 +45,7 @@ func (*accountHandler) New(c echo.Context) error {
 			return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrExist))
 		} else {
 			c.Logger().Error("[New account]", err)
-			return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
+			return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
 		}
 	}
 
@@ -69,7 +69,7 @@ func (*accountHandler) ModifyPhone(c echo.Context) error {
 
 	if err := model.AccountService.ModifyPhone(req.Old, req.New); err != nil {
 		c.Logger().Error("[ModifyPhone]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
 	}
 
 	return c.JSON(http.StatusOK, Resp(common.RespSuccess, nil))
@@ -90,7 +90,7 @@ func (*accountHandler) ModifyState(c echo.Context) error {
 	err := model.AccountService.ModifyState(req.Phone)
 	if err != nil {
 		c.Logger().Error("[ModifyState]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
 	}
 
 	return c.JSON(http.StatusOK, Resp(common.RespSuccess, nil))
@@ -134,7 +134,7 @@ func (*accountHandler) Info(c echo.Context) error {
 	a, err := model.AccountService.Info(req.Phone)
 	if err != nil {
 		c.Logger().Error("[Info]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
 	}
 
 	return c.JSON(http.StatusOK, Resp(common.RespSuccess, a))
@@ -145,7 +145,7 @@ func (*accountHandler) List(c echo.Context) error {
 	a, err := model.AccountService.All()
 	if err != nil {
 		c.Logger().Error("[List]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongo))
+		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
 	}
 
 	return c.JSON(http.StatusOK, Resp(common.RespSuccess, a))
@@ -172,7 +172,7 @@ func (*accountHandler) Recharge(c echo.Context) error {
 
 	balance, err := model.AccountService.Deal(req.Phone, float32(req.Sum))
 	if err != nil {
-		if err.Error() == common.ErrBalance {
+		if err.Error() == common.RespText(common.ErrBalance) {
 			c.Logger().Error("[Recharge]", err)
 			return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrBalance))
 		} else {
