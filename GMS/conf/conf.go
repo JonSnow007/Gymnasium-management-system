@@ -5,19 +5,15 @@
 
 package conf
 
-import (
-	"log"
-
-	"github.com/JonSnow007/Gymnasium-management-system/GMS/util"
-)
-
 const (
 	MongoURL = "localhost:27017"
 	MongoDB  = "GMS"
+
+	Price = 20
 )
 
 type Gms struct {
-	Price float32
+	Price int
 }
 
 type Mgo struct {
@@ -27,16 +23,26 @@ type Mgo struct {
 
 type Config struct {
 	Mod string
-	Mgo *Mgo
-	Gms *Gms
+	Mgo Mgo
+	Gms Gms
 }
 
-var Conf Config
-
-func init() {
-	err := util.ParseConf("conf/conf.json", &Conf)
-	if err != nil {
-		log.Println("[Parse configuraion]", err)
-	}
-	//fmt.Println(Conf)
+var Conf = &Config{
+	Mod: "dev",
+	Mgo: Mgo{
+		Database: MongoDB,
+		URL:      MongoURL,
+	},
+	Gms: Gms{
+		Price: Price,
+	},
 }
+
+//var Conf Config
+
+//func init() {
+//	err := util.ParseConf("./conf/conf.json", &Conf)
+//	if err != nil {
+//		log.Println("[Parse configuraion]", err)
+//	}
+//}

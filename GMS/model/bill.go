@@ -24,9 +24,9 @@ type Bill struct {
 	State    bool          `bson:"State"`    // true:完成 false:未完成
 	InAt     time.Time     `bson:"InAt"`     // 入场时间
 	OutAt    time.Time     `bson:"OutAt"`    // 出场时间
-	Duration float64       `bson:"Duration"` // 使用时长
-	Price    float32       `bson:"Price"`    // 单价: ￥/h
-	Consume  float32       `bson:"Consume"`  // 消费: ￥
+	Duration int           `bson:"Duration"` // 使用时长: min
+	Price    int           `bson:"Price"`    // 单价: ￥/h
+	Consume  int           `bson:"Consume"`  // 消费: ￥
 }
 
 type billServiceProvide struct{}
@@ -74,8 +74,12 @@ func (*billServiceProvide) Clearing(phone string) (b Bill, err error) {
 	}
 
 	b.OutAt = time.Now()
-	b.Duration = time.Since(b.InAt).Minutes()
-	b.Consume = float32(b.Duration) / 60 * b.Price
+	b.Duration = int(time.Since(b.InAt).Minutes())
+	if b.Duration%60 > 15 {
+		b.Consume = int(b.Duration*b.Price/60 + b.Price)
+	} else {
+		b.Consume = int(b.Duration * b.Price / 60)
+	}
 	b.State = true
 
 	err = con.C.Update(bson.M{"_id": b.Id}, &b)
@@ -132,4 +136,21 @@ func (*billServiceProvide) List() (b []*Bill, err error) {
 	}
 
 	return b, nil
+}
+
+func (*billServiceProvide) Total() (total int, err error) {
+	con := conBill()
+	defer con.S.Close()
+
+	var bills []*Bill
+	err = con.C.Find(nil).All(&bills)
+	if err != nil {
+		return
+	}
+
+	for i, _ := range bills {
+		total += bills[i].Consume
+	}
+
+	return
 }

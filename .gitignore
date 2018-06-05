@@ -12,5 +12,4 @@
 *.out
 
 # Directory
-vendor
-test
+.idea

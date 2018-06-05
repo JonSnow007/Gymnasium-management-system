@@ -36,40 +36,17 @@ func (*accountHandler) New(c echo.Context) error {
 
 	if err = c.Validate(&req); err != nil {
 		c.Logger().Error("[Validate]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrValidate))
+		return c.JSON(http.StatusOK, Resp(common.ErrValidate))
 	}
 
 	err = model.AccountService.New(req.Name, req.Phone)
 	if err != nil {
 		if mgo.IsDup(err) {
-			return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrExist))
+			return c.JSON(http.StatusOK, Resp(common.ErrExist))
 		} else {
 			c.Logger().Error("[New account]", err)
-			return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
+			return c.JSON(http.StatusOK, Resp(common.ErrMongoDB))
 		}
-	}
-
-	return c.JSON(http.StatusOK, Resp(common.RespSuccess, nil))
-}
-
-// 修改电话, phone 作为 id 时不可修改
-func (*accountHandler) ModifyPhone(c echo.Context) error {
-	var req struct {
-		Old string `json:"old" validate:"required,numeric,len=11"`
-		New string `json:"new" validate:"required,numeric,len=11"`
-	}
-
-	req.Old = c.FormValue("old")
-	req.New = c.FormValue("new")
-
-	if !util.PhoneNum(req.Old) && util.PhoneNum(req.New) {
-		c.Logger().Error("[Validate]")
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrValidate))
-	}
-
-	if err := model.AccountService.ModifyPhone(req.Old, req.New); err != nil {
-		c.Logger().Error("[ModifyPhone]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
 	}
 
 	return c.JSON(http.StatusOK, Resp(common.RespSuccess, nil))
@@ -84,13 +61,16 @@ func (*accountHandler) ModifyState(c echo.Context) error {
 
 	if !util.PhoneNum(req.Phone) {
 		c.Logger().Error("[Validate]")
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrValidate))
+		return c.JSON(http.StatusOK, Resp(common.ErrValidate))
 	}
 
 	err := model.AccountService.ModifyState(req.Phone)
 	if err != nil {
+		if err == mgo.ErrNotFound {
+			return c.JSON(http.StatusOK, Resp(common.ErrNotFound))
+		}
 		c.Logger().Error("[ModifyState]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
+		return c.JSON(http.StatusOK, Resp(common.ErrMongoDB))
 	}
 
 	return c.JSON(http.StatusOK, Resp(common.RespSuccess, nil))
@@ -128,13 +108,16 @@ func (*accountHandler) Info(c echo.Context) error {
 
 	if err := c.Validate(&req); err != nil {
 		c.Logger().Error("[Validate]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrValidate))
+		return c.JSON(http.StatusOK, Resp(common.ErrValidate))
 	}
 
 	a, err := model.AccountService.Info(req.Phone)
 	if err != nil {
+		if err == mgo.ErrNotFound {
+			return c.JSON(http.StatusOK, Resp(common.ErrNotFound))
+		}
 		c.Logger().Error("[Info]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
+		return c.JSON(http.StatusOK, Resp(common.ErrMongoDB))
 	}
 
 	return c.JSON(http.StatusOK, Resp(common.RespSuccess, a))
@@ -145,7 +128,7 @@ func (*accountHandler) List(c echo.Context) error {
 	a, err := model.AccountService.All()
 	if err != nil {
 		c.Logger().Error("[List]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
+		return c.JSON(http.StatusOK, Resp(common.ErrMongoDB))
 	}
 
 	return c.JSON(http.StatusOK, Resp(common.RespSuccess, a))
@@ -162,24 +145,27 @@ func (*accountHandler) Recharge(c echo.Context) error {
 	req.Sum, _ = strconv.Atoi(c.FormValue("sum"))
 
 	if req.Sum < 1 {
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrParam))
+		return c.JSON(http.StatusOK, Resp(common.ErrParam))
 	}
 
 	if err := c.Validate(&req); err != nil {
 		c.Logger().Error("[Validate]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrValidate))
+		return c.JSON(http.StatusOK, Resp(common.ErrValidate))
 	}
 
-	balance, err := model.AccountService.Deal(req.Phone, float32(req.Sum))
+	balance, err := model.AccountService.Deal(req.Phone, req.Sum)
 	if err != nil {
+		if err == mgo.ErrNotFound {
+			return c.JSON(http.StatusOK, Resp(common.ErrNotFound))
+		}
 		if err.Error() == common.RespText(common.ErrBalance) {
 			c.Logger().Error("[Recharge]", err)
-			return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrBalance))
+			return c.JSON(http.StatusOK, Resp(common.ErrBalance))
 		} else {
 			c.Logger().Error("[Recharge]", err)
-			return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrDeal))
+			return c.JSON(http.StatusOK, Resp(common.ErrDeal))
 		}
 	}
 
-	return c.JSON(http.StatusOK, Resp(common.RespSuccess, map[string]float32{"balance": balance}))
+	return c.JSON(http.StatusOK, Resp(common.RespSuccess, map[string]int{"balance": balance}))
 }

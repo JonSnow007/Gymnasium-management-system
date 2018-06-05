@@ -30,18 +30,18 @@ func (*adminHandler) New(c echo.Context) error {
 
 	if err = c.Bind(&req); err != nil {
 		c.Logger().Error("[Parameter]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrParam))
+		return c.JSON(http.StatusOK, Resp(common.ErrParam))
 	}
 
 	if err = c.Validate(&req); err != nil {
 		c.Logger().Error("[Validate]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrValidate))
+		return c.JSON(http.StatusOK, Resp(common.ErrValidate))
 	}
 
 	id, err := model.AdminService.New(req.Name, req.Pwd)
 	if err != nil {
 		c.Logger().Error("[New admin]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
+		return c.JSON(http.StatusOK, Resp(common.ErrMongoDB))
 	}
 
 	return c.JSON(http.StatusOK, Resp(common.RespSuccess, map[string]string{common.RespKeyId: id}))
@@ -55,25 +55,25 @@ func (*adminHandler) Login(c echo.Context) error {
 
 	if err := c.Bind(&req); err != nil {
 		c.Logger().Error("[Parameter]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrParam))
+		return c.JSON(http.StatusOK, Resp(common.ErrParam))
 	}
 
 	if err := c.Validate(&req); err != nil {
 		c.Logger().Error("[Validate]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrValidate))
+		return c.JSON(http.StatusOK, Resp(common.ErrValidate))
 	}
 
 	ok, err := model.AdminService.Login(req.Name, req.Pwd)
 	if err != nil {
 		if err == mgo.ErrNotFound {
-			return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrNotFound))
+			return c.JSON(http.StatusOK, Resp(common.ErrNotFound))
 		}
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
+		return c.JSON(http.StatusOK, Resp(common.ErrMongoDB))
 	}
 
 	if ok == true {
 		return c.JSON(http.StatusOK, Resp(common.RespSuccess, nil))
 	} else {
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrAccount))
+		return c.JSON(http.StatusOK, Resp(common.ErrAccount))
 	}
 }

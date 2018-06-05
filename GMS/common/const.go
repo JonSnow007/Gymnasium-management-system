@@ -16,7 +16,6 @@ const (
 
 // response status
 const (
-	RespStatus  = true
 	RespSuccess = 0
 	RespFailed  = 1
 
@@ -35,8 +34,8 @@ const (
 	ErrBalance  = 521 // ErrWechatAuth - Wechat Auth error.
 	ErrGymUsing = 522
 
-	ErrMongoDB  = 600 // ErrMongoDB - MongoDB operations error.
-	ErrMysql    = 700 // ErrMysql - Mysql operations error.
+	ErrMongoDB = 600 // ErrMongoDB - MongoDB operations error.
+	ErrMysql   = 700 // ErrMysql - Mysql operations error.
 )
 
 // respText

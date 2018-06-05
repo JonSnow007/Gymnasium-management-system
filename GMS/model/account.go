@@ -18,13 +18,15 @@ import (
 
 const collectionAccount = "account"
 
+// Account represents the account information.
 type Account struct {
-	Phone   string    `bson:"_id"`
-	Name    string    `bson:"Name"`
-	Balance float32   `bson:"Balance"` // 余额
-	Active  bool      `bson:"Active"`  // 用户是否在场
-	State   bool      `bson:"State"`   // 身份：0.不可用 1.正常使用
-	Created time.Time `bson:"Created"`
+	Phone    string    `bson:"_id"`
+	Name     string    `bson:"Name"`
+	Balance  int       `bson:"Balance"`  // 余额
+	Recorded int       `bson:"Recorded"` // 充值总金额
+	Active   bool      `bson:"Active"`   // 用户是否在场
+	State    bool      `bson:"State"`    // 身份：0.不可用 1.正常使用
+	Created  time.Time `bson:"Created"`
 }
 
 type accountServiceProvide struct{}
@@ -43,6 +45,7 @@ func conAccount() db.Connection {
 	return con
 }
 
+// New account.
 func (*accountServiceProvide) New(name, phone string) error {
 	con := conAccount()
 	defer con.S.Close()
@@ -67,20 +70,7 @@ func (*accountServiceProvide) New(name, phone string) error {
 	return nil
 }
 
-// ModifyPhone forbidden
-func (*accountServiceProvide) ModifyPhone(old, new string) error {
-	con := conAccount()
-	defer con.S.Close()
-
-	if !util.PhoneNum(new) {
-		return errors.New("Incorrect phone num")
-	}
-
-	err := con.C.Update(bson.M{"_id": old}, bson.M{"$set": bson.M{"_id": new}})
-	return err
-}
-
-// 修改是否在场状态
+// InOut represents if account in gym.
 func (*accountServiceProvide) InOut(phone string) error {
 	con := conAccount()
 	defer con.S.Close()
@@ -96,7 +86,7 @@ func (*accountServiceProvide) InOut(phone string) error {
 	return err
 }
 
-// 修改状态
+// ModifyState modify account state(usable/unusable).
 func (*accountServiceProvide) ModifyState(phone string) error {
 	con := conAccount()
 	defer con.S.Close()
@@ -111,7 +101,7 @@ func (*accountServiceProvide) ModifyState(phone string) error {
 	return err
 }
 
-// 查询信息
+// Info represents get a account info.
 func (*accountServiceProvide) Info(phone string) (a *Account, err error) {
 	con := conAccount()
 	defer con.S.Close()
@@ -124,7 +114,7 @@ func (*accountServiceProvide) Info(phone string) (a *Account, err error) {
 	return
 }
 
-// All
+// All account list.
 func (*accountServiceProvide) All() (a []*Account, err error) {
 	con := conAccount()
 	defer con.S.Close()
@@ -134,7 +124,7 @@ func (*accountServiceProvide) All() (a []*Account, err error) {
 }
 
 // Deal recharge or pay.
-func (*accountServiceProvide) Deal(phone string, money float32) (float32, error) {
+func (*accountServiceProvide) Deal(phone string, money int) (int, error) {
 	con := conAccount()
 	defer con.S.Close()
 
@@ -148,6 +138,32 @@ func (*accountServiceProvide) Deal(phone string, money float32) (float32, error)
 		return 0, errors.New("Lack of balance")
 	}
 
-	err = con.C.Update(bson.M{"_id": phone, "State": true}, bson.M{"$inc": bson.M{"Balance": money}})
+	if money > 0 {
+		err = con.C.Update(bson.M{"_id": phone, "State": true}, bson.M{"$inc": bson.M{
+			"Balance":  money,
+			"Recorded": money,
+		}})
+		if err != nil {
+			return 0, err
+		}
+	} else {
+		err = con.C.Update(bson.M{"_id": phone, "State": true}, bson.M{"$inc": bson.M{"Balance": money}})
+	}
 	return a.Balance + money, err
+}
+
+// Recorded represents all recorded.
+func (*accountServiceProvide) Recorded() (recorded int, err error) {
+	con := conAccount()
+	defer con.S.Close()
+
+	var accounts []*Account
+	err = con.C.Find(nil).Select("Recorded").All(&accounts)
+	if err != nil {
+		return
+	}
+	for i, _ := range accounts {
+		recorded += accounts[i].Recorded
+	}
+	return
 }

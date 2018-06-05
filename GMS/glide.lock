@@ -1,0 +1,51 @@
+hash: 9036f8cdb4824cd14b8686bfc6f0f06787b229385d3359f03ccb9f60d8ec4d2d
+updated: 2018-06-04T21:44:03.623544578+08:00
+imports:
+- name: github.com/dgrijalva/jwt-go
+  version: 06ea1031745cb8b3dab3f6a236daf2b0aa468b7e
+- name: github.com/go-playground/locales
+  version: f63010822830b6fe52288ee52d5a1151088ce039
+  subpackages:
+  - currency
+- name: github.com/go-playground/universal-translator
+  version: b32fa301c9fe55953584134cb6853a13c87ec0a1
+- name: github.com/labstack/echo
+  version: 6d227dfea4d2e52cb76856120b3c17f758139b4e
+  subpackages:
+  - middleware
+- name: github.com/labstack/gommon
+  version: 588f4e8bddc6cb45c27b448e925c7fd6a5545434
+  subpackages:
+  - bytes
+  - color
+  - log
+  - random
+- name: github.com/mattn/go-colorable
+  version: ad5389df28cdac544c99bd7b9161a0b5b6ca9d1b
+- name: github.com/mattn/go-isatty
+  version: fc9e8d8ef48496124e79ae0df75490096eccf6fe
+- name: github.com/valyala/bytebufferpool
+  version: e746df99fe4a3986f4d4f79e13c1e0117ce9c2f7
+- name: github.com/valyala/fasttemplate
+  version: dcecefd839c4193db0d35b88ec65b4c12d360ab0
+- name: golang.org/x/crypto
+  version: 9ef620b9ca2f82b55030ffd4f41327fa9e77a92c
+  subpackages:
+  - acme
+  - acme/autocert
+  - bcrypt
+  - blowfish
+- name: golang.org/x/sys
+  version: 43e60d72a8e2bd92ee98319ba9a384a0e9837c08
+  subpackages:
+  - unix
+- name: gopkg.in/go-playground/validator.v9
+  version: f28cb45dc0f0f406ba2015cdb59a5203ad220bc2
+- name: gopkg.in/mgo.v2
+  version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
+  subpackages:
+  - bson
+  - internal/json
+  - internal/sasl
+  - internal/scram
+testImports: []

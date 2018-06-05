@@ -33,13 +33,13 @@ func (*groundHandler) New(c echo.Context) error {
 
 	if err = c.Validate(&req); err != nil {
 		c.Logger().Error("[Validate]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrValidate))
+		return c.JSON(http.StatusOK, Resp(common.ErrValidate))
 	}
 
 	err = model.GymService.New(req.Name)
 	if err != nil {
 		c.Logger().Error("[New account]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
+		return c.JSON(http.StatusOK, Resp(common.ErrMongoDB))
 	}
 
 	return c.JSON(http.StatusOK, Resp(common.RespSuccess, nil))
@@ -57,17 +57,17 @@ func (*groundHandler) Info(c echo.Context) error {
 	req.Id, err = strconv.Atoi(c.FormValue("id"))
 	if err != nil {
 		c.Logger().Error("[Validate]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrValidate))
+		return c.JSON(http.StatusOK, Resp(common.ErrValidate))
 	}
 
 	g, err := model.GymService.Info(req.Id)
 	if err != nil {
 		if err == mgo.ErrNotFound {
 			c.Logger().Error("[Info]", err)
-			return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrNotFound))
+			return c.JSON(http.StatusOK, Resp(common.ErrNotFound))
 		}
 		c.Logger().Error("[Info]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
+		return c.JSON(http.StatusOK, Resp(common.ErrMongoDB))
 	}
 
 	return c.JSON(http.StatusOK, Resp(common.RespSuccess, g))
@@ -79,7 +79,7 @@ func (*groundHandler) List(c echo.Context) error {
 	g, err := model.GymService.List()
 	if err != nil {
 		c.Logger().Error("[List]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
+		return c.JSON(http.StatusOK, Resp(common.ErrMongoDB))
 	}
 
 	return c.JSON(http.StatusOK, Resp(common.RespSuccess, g))
@@ -97,13 +97,16 @@ func (*groundHandler) ModifyState(c echo.Context) error {
 	req.Id, err = strconv.Atoi(c.FormValue("id"))
 	if err != nil {
 		c.Logger().Error("[Validate]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrValidate))
+		return c.JSON(http.StatusOK, Resp(common.ErrValidate))
 	}
 
 	err = model.GymService.State(req.Id)
 	if err != nil {
+		if err == mgo.ErrNotFound {
+			return c.JSON(http.StatusOK, Resp(common.ErrNotFound))
+		}
 		c.Logger().Error("[ModifyState]", err)
-		return c.JSON(http.StatusOK, Resp(common.RespFailed, common.ErrMongoDB))
+		return c.JSON(http.StatusOK, Resp(common.ErrMongoDB))
 	}
 
 	return c.JSON(http.StatusOK, Resp(common.RespSuccess, nil))
