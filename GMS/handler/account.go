@@ -6,11 +6,9 @@
 package handler
 
 import (
-	"net/http"
-	"strconv"
-
 	"github.com/labstack/echo"
 	"gopkg.in/mgo.v2"
+	"net/http"
 
 	"github.com/JonSnow007/Gymnasium-management-system/GMS/common"
 	"github.com/JonSnow007/Gymnasium-management-system/GMS/model"
@@ -26,13 +24,17 @@ func (*accountHandler) New(c echo.Context) error {
 	var (
 		err error
 		req struct {
-			Name  string `validate:"required,min=1,max=10"`
-			Phone string `validate:"required,numeric,len=11"`
+			Name  string `json:"name" validate:"required,min=1,max=10"`
+			Phone string `json:"phone" validate:"required,numeric,len=11"`
 		}
 	)
 
-	req.Name = c.FormValue("name")
-	req.Phone = c.FormValue("phone")
+	//req.Name = c.FormValue("name")
+	//req.Phone = c.FormValue("phone")
+	if err = c.Bind(&req); err != nil {
+		c.Logger().Error("[Bind]", err)
+		return c.JSON(http.StatusOK, Resp(common.ErrParam))
+	}
 
 	if err = c.Validate(&req); err != nil {
 		c.Logger().Error("[Validate]", err)
@@ -55,9 +57,14 @@ func (*accountHandler) New(c echo.Context) error {
 // 修改状态
 func (*accountHandler) ModifyState(c echo.Context) error {
 	var req struct {
-		Phone string
+		Phone string `json:"phone" validate:"numeric,len=11"`
 	}
-	req.Phone = c.FormValue("phone")
+
+	//req.Phone = c.FormValue("phone")
+	if err := c.Bind(&req); err != nil {
+		c.Logger().Error("[Bind]", err)
+		return c.JSON(http.StatusOK, Resp(common.ErrParam))
+	}
 
 	if !util.PhoneNum(req.Phone) {
 		c.Logger().Error("[Validate]")
@@ -101,10 +108,14 @@ func (*accountHandler) ModifyState(c echo.Context) error {
 // 信息查询
 func (*accountHandler) Info(c echo.Context) error {
 	var req struct {
-		Phone string `validate:"numeric,len=11"`
+		Phone string `json:"phone" validate:"numeric,len=11"`
 	}
 
-	req.Phone = c.FormValue("phone")
+	//req.Phone = c.FormValue("phone")
+	if err := c.Bind(&req); err != nil {
+		c.Logger().Error("[Bind]", err)
+		return c.JSON(http.StatusOK, Resp(common.ErrParam))
+	}
 
 	if err := c.Validate(&req); err != nil {
 		c.Logger().Error("[Validate]", err)
@@ -137,13 +148,17 @@ func (*accountHandler) List(c echo.Context) error {
 // 充值与支付
 func (*accountHandler) Recharge(c echo.Context) error {
 	var req struct {
-		Phone string `validate:"numeric,len=11"`
-		Sum   int
+		Phone string `json:"phone" validate:"numeric,len=11"`
+		Sum   int    `json:"sum" validate:"numeric"`
 	}
 
-	req.Phone = c.FormValue("phone")
-	req.Sum, _ = strconv.Atoi(c.FormValue("sum"))
-
+	//req.Phone = c.FormValue("phone")
+	//req.Sum, _ = strconv.Atoi(c.FormValue("sum"))
+	if err := c.Bind(&req); err != nil {
+		c.Logger().Error("[Bind]", err)
+		return c.JSON(http.StatusOK, Resp(common.ErrParam))
+	}
+	
 	if req.Sum < 1 {
 		return c.JSON(http.StatusOK, Resp(common.ErrParam))
 	}

@@ -14,6 +14,7 @@ import (
 
 	"github.com/JonSnow007/Gymnasium-management-system/GMS/db"
 	"github.com/JonSnow007/Gymnasium-management-system/GMS/util"
+	"fmt"
 )
 
 const collectionAccount = "account"
@@ -63,6 +64,7 @@ func (*accountServiceProvide) New(name, phone string) error {
 	}
 
 	err := con.C.Insert(account)
+	fmt.Println(err)
 	if err != nil {
 		return err
 	}

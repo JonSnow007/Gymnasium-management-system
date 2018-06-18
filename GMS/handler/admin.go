@@ -7,12 +7,14 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo"
 	"gopkg.in/mgo.v2"
 
 	"github.com/JonSnow007/Gymnasium-management-system/GMS/common"
 	"github.com/JonSnow007/Gymnasium-management-system/GMS/model"
+	"github.com/JonSnow007/Gymnasium-management-system/GMS/util"
 )
 
 type adminHandler struct{}
@@ -70,10 +72,25 @@ func (*adminHandler) Login(c echo.Context) error {
 		}
 		return c.JSON(http.StatusOK, Resp(common.ErrMongoDB))
 	}
+	func(c echo.Context) {
+		cookie := new(http.Cookie)
+		cookie.Name = "admin"
+		cookie.Value = req.Name
+		cookie.Expires = time.Now().Add(24 * time.Hour)
+		c.SetCookie(cookie)
+	}(c)
 
+	// todo: get session
+	util.GetSession(c, req.Name)
 	if ok == true {
 		return c.JSON(http.StatusOK, Resp(common.RespSuccess, nil))
 	} else {
 		return c.JSON(http.StatusOK, Resp(common.ErrAccount))
 	}
+}
+
+func (*adminHandler) Logout(c echo.Context) (err error) {
+	// todo: clear session
+	util.ClearSession(c)
+	return
 }

@@ -12,26 +12,43 @@ import (
 )
 
 func Init(e *echo.Echo) {
-	e.GET("/api/home", handler.Service.Home)
-	e.GET("/api/service/in", handler.Service.In)
-	e.GET("/api/service/out", handler.Service.Out)
+	api := e.Group("/api")
+	{
+		admin := api.Group("/admin")
+		{
+			admin.POST("/new", handler.Admin.New)
+			admin.POST("/login", handler.Admin.Login)
+			admin.GET("/logout", handler.Admin.Logout)
+		}
+		account := api.Group("/account")
+		{
+			account.POST("/new", handler.Account.New)
+			account.POST("/modifystate", handler.Account.ModifyState)
+			account.POST("/info", handler.Account.Info)
+			account.GET("/list", handler.Account.List)
+			account.POST("/recharge", handler.Account.Recharge)
+		}
+		gym := api.Group("gym")
+		{
+			gym.POST("/new", handler.Ground.New)
+			gym.POST("/info", handler.Ground.Info)
+			gym.GET("/list", handler.Ground.List)
+			gym.POST("/state", handler.Ground.ModifyState)
+		}
+		service := api.Group("/service")
+		{
+			service.POST("/in", handler.Service.In)
+			service.POST("/out", handler.Service.Out)
+		}
+		bill := api.Group("/bill")
+		{
+			bill.POST("/info", handler.Bill.Info)
+			bill.GET("/list", handler.Bill.List)
+			bill.POST("/listbyphone", handler.Bill.ListByPhone)
+			bill.POST("/listbygid", handler.Bill.ListByGid)
+		}
 
-	e.POST("/api/admin/new", handler.Admin.New)
-	e.POST("/api/admin/login", handler.Admin.Login)
-
-	e.GET("/api/account/new", handler.Account.New)
-	e.GET("/api/account/modifystate", handler.Account.ModifyState)
-	e.GET("/api/account/info", handler.Account.Info)
-	e.GET("/api/account/list", handler.Account.List)
-	e.GET("/api/account/recharge", handler.Account.Recharge)
-
-	e.GET("/api/gym/new", handler.Ground.New)
-	e.GET("/api/gym/info", handler.Ground.Info)
-	e.GET("/api/gym/list", handler.Ground.List)
-	e.GET("/api/gym/state", handler.Ground.ModifyState)
-
-	e.GET("/api/bill/info", handler.Bill.Info)
-	e.GET("/api/bill/list", handler.Bill.List)
-	e.GET("/api/bill/listbyphone", handler.Bill.ListByPhone)
-	e.GET("/api/bill/listbygid", handler.Bill.ListByGid)
+	}
 }
+
+// todo: without filter

@@ -6,9 +6,6 @@
 package main
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"
@@ -31,11 +28,11 @@ func initEcho() {
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
 	// 跨站配置
-	// e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-	// 	AllowOrigins: []string{"*"},
-	// 	AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE, echo.OPTIONS},
-	// 	AllowCredentials: true,
-	//   }))
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE, echo.OPTIONS},
+		AllowCredentials: true,
+	}))
 
 	e.HideBanner = true
 	e.Logger.SetLevel(log.Lvl(1))
@@ -55,7 +52,7 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 	return cv.validator.Struct(i)
 }
 
-func init() {
+/*func init() {
 	var first, last string
 	fmt.Println("Who am I?")
 	fmt.Scanf("%s %s", &first, &last)
@@ -64,3 +61,4 @@ func init() {
 		os.Exit(0)
 	}
 }
+*/

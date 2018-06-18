@@ -7,8 +7,6 @@ package handler
 
 import (
 	"net/http"
-	"strconv"
-
 	"github.com/labstack/echo"
 	"gopkg.in/mgo.v2"
 
@@ -29,7 +27,11 @@ func (*groundHandler) New(c echo.Context) error {
 		}
 	)
 
-	req.Name = c.FormValue("name")
+	//req.Name = c.FormValue("name")
+	if err = c.Bind(&req); err != nil {
+		c.Logger().Error("[Bind]", err)
+		return c.JSON(http.StatusOK, Resp(common.ErrParam))
+	}
 
 	if err = c.Validate(&req); err != nil {
 		c.Logger().Error("[Validate]", err)
@@ -54,10 +56,10 @@ func (*groundHandler) Info(c echo.Context) error {
 		}
 	)
 
-	req.Id, err = strconv.Atoi(c.FormValue("id"))
-	if err != nil {
-		c.Logger().Error("[Validate]", err)
-		return c.JSON(http.StatusOK, Resp(common.ErrValidate))
+	//req.Id, err = strconv.Atoi(c.FormValue("id"))
+	if err = c.Bind(&req); err != nil {
+		c.Logger().Error("[Bind]", err)
+		return c.JSON(http.StatusOK, Resp(common.ErrParam))
 	}
 
 	g, err := model.GymService.Info(req.Id)
@@ -94,10 +96,10 @@ func (*groundHandler) ModifyState(c echo.Context) error {
 		}
 	)
 
-	req.Id, err = strconv.Atoi(c.FormValue("id"))
-	if err != nil {
-		c.Logger().Error("[Validate]", err)
-		return c.JSON(http.StatusOK, Resp(common.ErrValidate))
+	//req.Id, err = strconv.Atoi(c.FormValue("id"))
+	if err = c.Bind(&req); err != nil {
+		c.Logger().Error("[Bind]", err)
+		return c.JSON(http.StatusOK, Resp(common.ErrParam))
 	}
 
 	err = model.GymService.State(req.Id)

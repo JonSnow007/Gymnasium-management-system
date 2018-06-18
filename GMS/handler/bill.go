@@ -6,10 +6,8 @@
 package handler
 
 import (
-	"net/http"
-	"strconv"
-
 	"github.com/labstack/echo"
+	"net/http"
 
 	"github.com/JonSnow007/Gymnasium-management-system/GMS/common"
 	"github.com/JonSnow007/Gymnasium-management-system/GMS/model"
@@ -26,7 +24,11 @@ func (*billHandler) Info(c echo.Context) error {
 		Id string `validate:"alphanum,len=24"`
 	}
 
-	req.Id = c.FormValue("id")
+	//req.Id = c.FormValue("id")
+	if err := c.Bind(&req); err != nil {
+		c.Logger().Error("[Bind]", err)
+		return c.JSON(http.StatusOK, Resp(common.ErrParam))
+	}
 
 	if err := c.Validate(&req); err != nil {
 		c.Logger().Error("[Validate]", err)
@@ -46,14 +48,22 @@ func (*billHandler) Info(c echo.Context) error {
 }
 
 func (*billHandler) ListByPhone(c echo.Context) error {
-	phone := c.FormValue("phone")
+	var req struct {
+		Phone string `json:"phone" validate:"required,len=11"`
+	}
 
-	if !util.PhoneNum(phone) {
+	//req.Phone = c.FormValue("phone")
+	if err := c.Bind(&req); err != nil {
+		c.Logger().Error("[Bind]", err)
+		return c.JSON(http.StatusOK, Resp(common.ErrParam))
+	}
+
+	if !util.PhoneNum(req.Phone) {
 		c.Logger().Error("[Validate]", common.ErrParam)
 		return c.JSON(http.StatusOK, Resp(common.ErrValidate))
 	}
 
-	bills, err := model.BillService.ListByPhone(phone)
+	bills, err := model.BillService.ListByPhone(req.Phone)
 	if err != nil {
 		c.Logger().Error("[ListByPhone]", err)
 		return c.JSON(http.StatusOK, Resp(common.ErrMongoDB))
@@ -63,14 +73,16 @@ func (*billHandler) ListByPhone(c echo.Context) error {
 }
 
 func (*billHandler) ListByGid(c echo.Context) error {
-	gid, err := strconv.Atoi(c.FormValue("id"))
+	var req struct {
+		Id int `json:"id" validate:"require,numeric"`
+	}
 
-	if err != nil {
-		c.Logger().Error("[Validate]", err)
+	if err := c.Bind(&req); err != nil {
+		c.Logger().Error("[Bind]", err)
 		return c.JSON(http.StatusOK, Resp(common.ErrValidate))
 	}
 
-	a, err := model.BillService.ListByGid(gid)
+	a, err := model.BillService.ListByGid(req.Id)
 	if err != nil {
 		c.Logger().Error("[ListByPid]", err)
 		return c.JSON(http.StatusOK, Resp(common.ErrMongoDB))
@@ -100,7 +112,7 @@ func (*billHandler) Total(c echo.Context) error {
 		return c.JSON(http.StatusOK, Resp(common.ErrMongoDB, nil))
 	}
 	return c.JSON(http.StatusOK, Resp(common.RespSuccess, map[string]int{
-		"Total":    total,
+		"total":    total,
 		"recorded": recorded,
 	}))
 }
